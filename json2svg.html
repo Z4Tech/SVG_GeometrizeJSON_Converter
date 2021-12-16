@@ -45,8 +45,7 @@ var svgText;
 function ReadImage(){
     jsonFile = document.querySelector('input[type=file]').files[0];
 		  draw.clear();
-        svgText = `
-    <?xml version="1.0" standalone="no"?>
+        svgText = `<?xml version="1.0" standalone="no"?>
     <svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny" width="1361" height="1588" viewBox="0 0 1361 1588">
     \n`;
     jsonreader.readAsText(jsonFile);
