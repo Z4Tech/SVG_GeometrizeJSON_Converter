@@ -12,7 +12,7 @@
   <body>
       	<h4>Geometrize SVG & JSON Converter</h4>
       <h5>by Z4Tech</h5>
-	<a href="README.md">Readme</a>
+	<a href="https://github.com/Z4Tech/SVG_GeometrizeJSON_Converter">Readme</a>
       <a href="json2svg.html">Convert JSON to SVG</a>
 	<h4>upload svg image</h4>
 	<input type="file" onchange="ReadImage()"><br>
@@ -94,8 +94,8 @@ function ReadImage(){
                           rgb = ellipse.css().fill;
                       rgb = ConvertRGB(rgb);
                       shape = {"type":16, 
-                                   "data":[ellipse.cx(),
-                                            ellipse.cy(),
+                                   "data":[ellipse.rbox(draw).cx,
+                                            ellipse.rbox(draw).cy,
                                             ellipse.rx(),
                                             ellipse.ry(),
                                             ellipse.transform().rotate],

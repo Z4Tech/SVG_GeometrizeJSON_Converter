@@ -12,4 +12,6 @@ You can generate SVG file with Geometrize and modify with your preferred vector 
 
 Or you can generate the JSON with forsa-painter-geometrize and convert to SVG to modify
 
-Don't add any new geometry to the canvas for now, only move, rotate and scale existing shapes pls!
+You can move, rotate and scale existing shapes.
+
+You can also add new ellipses in Inkscape, haven't tested in other softwares yet.
