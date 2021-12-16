@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Geometrize SVG & SVG Converter</title>
+    <style media="all">
+    </style>
+      <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+  </head>
+  <body>
+      	<h4>Geometrize SVG & SVG Converter</h4>
+      <h5>by Z4Tech</h5>
+	<a href="README.md">Readme</a>
+	<h4>upload svg image</h4>
+	<input type="file" onchange="ReadImage()"><br>
+	<br>
+	<textarea id="JSONText" rows="10" cols="50" readonly>
+	</textarea>
+      <br>
+      <button id="save">Save File</button>
+	<br>
+	<img id="drawing">
+      
+	<script>
+        
+var svgimage = document.querySelector('img');
+        
+var svgfile;
+var JSONText = document.querySelector('#JSONText'); 
+var svgreader = new FileReader();
+var rawsvg;
+var jsonText={"shapes":[]};
+var textJSONText;
+var shape;
+var rgb;
+
+// initialize SVG.js
+var draw = new SVG().addTo('body').size(2000, 2000);
+
+function ReadImage(){
+		  svgfile = document.querySelector('input[type=file]').files[0];
+		  draw.clear();
+		   svgreader.onloadend = function (evt) {
+               rawsvg = evt.target.result;
+               draw.svg(rawsvg);
+               draw.first().each(function(i, children) {
+                  if(this.constructor.name=='Rect'){
+                      var rect = this;
+                      //console.log(rect);
+                      if(rect){
+                          rgb = rect.fill();
+                      rgb = ConvertRGB(rgb);
+                      shape = {"type":1, 
+                               "data":[rect.x(),
+                                        rect.y(),
+                                        rect.width(),
+                                        rect.height()],
+                               "color":[rgb[0],rgb[1],rgb[2],Math.round(rect.opacity()*255)],"score":0.5};
+                      }
+                      
+                  }else if(this.constructor.name=='G'){
+                      var ellipse = this.find('ellipse')[0];
+                      var circle = this.find('circle')[0];
+                      if(ellipse){
+                          //console.log(this.attr());
+                          rgb = ellipse.fill();
+                          rgb = ConvertRGB(rgb);
+                          shape = {"type":16, 
+                                   "data":[this.transform().translateX,
+                                            this.transform().translateY,
+                                            this.transform().scaleX,
+                                            this.transform().scaleY,
+                                            this.transform().rotate],
+                                   "color":[rgb[0],rgb[1],rgb[2],Math.round(ellipse.opacity()*255)],"score":0.5};
+                      }else if(circle){
+                          //console.log(this.attr());
+                          rgb = circle.fill();
+                          rgb = ConvertRGB(rgb);
+                          shape = {"type":16, 
+                                   "data":[this.transform().translateX,
+                                            this.transform().translateY,
+                                            this.transform().scaleX,
+                                            this.transform().scaleY,
+                                            this.transform().rotate],
+                                   "color":[rgb[0],rgb[1],rgb[2],Math.round(circle.attr()["fill-opacity"]*255)],"score":0.5};
+                      }
+                  }else if(this.constructor.name=='Ellipse'){
+                      //console.log(this.attr());
+                      var ellipse = this;
+                      if(ellipse){
+                          rgb = ellipse.css().fill;
+                      rgb = ConvertRGB(rgb);
+                      shape = {"type":16, 
+                                   "data":[ellipse.cx(),
+                                            ellipse.cy(),
+                                            ellipse.rx(),
+                                            ellipse.ry(),
+                                            ellipse.transform().rotate],
+                                   "color":[rgb[0],rgb[1],rgb[2],Math.round(ellipse.css().opacity*255)],"score":0.5};
+                      }
+                  }
+                if(shape){
+                    shape.data.forEach((k,i) => {shape.data[i]=Math.round(k)})
+                    jsonText.shapes.push(shape);
+                }
+                })
+               textJSONText = JSON.stringify(jsonText, null, 1);
+               JSONText.value = textJSONText;
+              draw.svg(rawsvg);
+		   }
+
+		   if (svgfile) {
+			   svgreader.readAsText(svgfile);
+		   } else {
+			   svgimage.src = "";
+		   }
+		}
+
+function ConvertRGB(rgbstr){
+    var rgbArr=[0,0,0];
+    if(rgbstr.includes("rgb")){
+        rgbArr = rgbstr.slice(
+                    rgbstr.indexOf("(") + 1, 
+                    rgbstr.indexOf(")")
+                    ).split(",");
+    rgbArr.forEach( (k, i) => { rgbArr[i]=Number(k)} );
+    //console.log(rgbArr);
+    }else if(rgbstr.includes("#")){
+        var hexRGB = hexToRgb(rgbstr);
+        rgbArr = [hexRGB.r, hexRGB.g, hexRGB.b];
+    }
+    
+    return rgbArr;
+}
+        
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+        
+        
+function download(content, fileName, contentType) {
+    var a = document.createElement("a");
+    var file = new Blob([content], {type: contentType});
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+}
+
+document.querySelector('#save').onclick = function(){download(textJSONText, 'Vinyl.json', 'text/plain');};
+
+        
+        
+  </script>
+
+  </body>
+</html>
