@@ -10,4 +10,6 @@ Created for [forza-painter](https://github.com/forza-painter/forza-painter)
 
 You can generate SVG file with Geometrize and modify with your preferred vector software (Inkscape for example), and convert back to json supported by forza-painter
 
+Or you can generate the JSON with forsa-painter-geometrize and convert to SVG to modify
+
 Don't add any new geometry to the canvas for now, only move, rotate and scale existing shapes pls!
