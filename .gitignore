@@ -1,4 +1,10 @@
-test.svg
-test_mod.svg
+.svg
+.json
 
-Vinyl.json
+mod_forza_painter/__pycache__/
+
+mod_forza_painter/preview.png
+
+*.json
+
+*.svg

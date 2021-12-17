@@ -8,6 +8,7 @@
     <style media="all">
     </style>
       <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+      <script src="https://unpkg.com/mathjs/lib/browser/math.js"></script>
   </head>
   <body>
       	<h4>Geometrize SVG & JSON Converter</h4>
@@ -36,6 +37,10 @@ var jsonText={"shapes":[]};
 var textJSONText;
 var shape;
 var rgb;
+
+        
+const stdTrig = "1,0.86602540378 -1,0.86602540378 0,-0.86602540378";
+const inv_stdTrig = math.inv(math.matrix([[1,-1,0],[0.86602540378,0.86602540378,-0.86602540378],[1,1,1]]));
 
 // initialize SVG.js
 var draw = new SVG().addTo('body').size(2000, 2000);
@@ -93,13 +98,48 @@ function ReadImage(){
                       if(ellipse){
                           rgb = ellipse.css().fill;
                       rgb = ConvertRGB(rgb);
+                      var opac = Math.round(ellipse.css().opacity*255);
+                      if(!opac){
+                          opac = 255;
+                      }
                       shape = {"type":16, 
                                    "data":[ellipse.rbox(draw).cx,
                                             ellipse.rbox(draw).cy,
                                             ellipse.rx(),
                                             ellipse.ry(),
                                             ellipse.transform().rotate],
-                                   "color":[rgb[0],rgb[1],rgb[2],Math.round(ellipse.css().opacity*255)],"score":0.5};
+                                   "color":[rgb[0],rgb[1],rgb[2],opac],"score":0.5};
+                      }
+                  }else if(this.constructor.name=='Polygon'){
+                      var polygon = this;
+                      console.log(polygon.array().length);
+                      if(polygon && (polygon.array().length == 3 || polygon.array().length == 4) ) {
+                          
+                          rgb = polygon.css().fill;
+                          console.log(rgb);
+                          var trig = draw.first().group();
+                          //trig.polygon(stdTrig).fill(rgb);
+                          rgb = ConvertRGB(rgb);
+                          var opac = Math.round(polygon.css().opacity*255);
+                          if(!opac){
+                              opac = 255;
+                          }
+                          var trig_mat = math.matrix([[polygon.array()[0][0], polygon.array()[1][0], polygon.array()[2][0]],
+                                                      [polygon.array()[0][1], polygon.array()[1][1], polygon.array()[2][1]],
+                                                      [1, 1, 1]]);
+                          var trans_mat = math.multiply(trig_mat, inv_stdTrig);
+                          trig.matrix(trans_mat.subset(math.index(0,0)), trans_mat.subset(math.index(1,0)),
+                                      trans_mat.subset(math.index(0,1)), trans_mat.subset(math.index(1,1)),
+                                      trans_mat.subset(math.index(0,2)), trans_mat.subset(math.index(1,2)));
+                          trig.clear();
+                          shape = {"type":99, 
+                                       "data":[trig.transform().translateX,
+                                                trig.transform().translateY,
+                                                trig.transform().scaleX,
+                                                trig.transform().scaleY,
+                                                trig.transform().rotate,
+                                                trig.transform().shear],
+                                       "color":[rgb[0],rgb[1],rgb[2],opac],"score":0.5};
                       }
                   }
                 if(shape){
@@ -109,7 +149,6 @@ function ReadImage(){
                 })
                textJSONText = JSON.stringify(jsonText, null, 1);
                JSONText.value = textJSONText;
-              draw.svg(rawsvg);
 		   }
 
 		   if (svgfile) {
@@ -121,17 +160,20 @@ function ReadImage(){
 
 function ConvertRGB(rgbstr){
     var rgbArr=[0,0,0];
-    if(rgbstr.includes("rgb")){
-        rgbArr = rgbstr.slice(
-                    rgbstr.indexOf("(") + 1, 
-                    rgbstr.indexOf(")")
-                    ).split(",");
-    rgbArr.forEach( (k, i) => { rgbArr[i]=Number(k)} );
-    //console.log(rgbArr);
-    }else if(rgbstr.includes("#")){
-        var hexRGB = hexToRgb(rgbstr);
-        rgbArr = [hexRGB.r, hexRGB.g, hexRGB.b];
+    if(rgbstr){
+        if(rgbstr.includes("rgb")){
+            rgbArr = rgbstr.slice(
+                        rgbstr.indexOf("(") + 1, 
+                        rgbstr.indexOf(")")
+                        ).split(",");
+            rgbArr.forEach( (k, i) => { rgbArr[i]=Number(k)} );
+            //console.log(rgbArr);
+        }else if(rgbstr.includes("#")){
+            var hexRGB = hexToRgb(rgbstr);
+            rgbArr = [hexRGB.r, hexRGB.g, hexRGB.b];
+        }
     }
+    
     
     return rgbArr;
 }

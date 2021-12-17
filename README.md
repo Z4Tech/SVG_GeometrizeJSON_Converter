@@ -14,4 +14,7 @@ Or you can generate the JSON with forsa-painter-geometrize and convert to SVG to
 
 You can move, rotate and scale existing shapes.
 
-You can also add new ellipses in Inkscape, haven't tested in other softwares yet.
+You can also add new ellipses in Inkscape or Adobe Illustrator, haven't tested in other softwares yet.
+
+##12/17/2021
+Add triangle support in Adobe Illustrator. Just draw closed triangles using pen tool, it can be ported into Forza with the moded forza-painter (download availible in the git repo)
